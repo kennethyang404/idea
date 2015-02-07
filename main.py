@@ -26,10 +26,6 @@ class posts(db.Model):
         self.score=score
         self.date = datetime.utcnow()
 
-Users=SQLAlchemy(app)
-
-class users(Users.Model):
-    ID=Users.Column(db.Integer,primary_key=True)
 db.create_all()
 
 
