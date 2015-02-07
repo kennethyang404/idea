@@ -144,7 +144,7 @@ def logout():
 
 
 def emailHandler(email):
-    if "@" in email:
+    if "cmu.edu" in email:
         return email
     return None
 
