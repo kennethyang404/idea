@@ -33,6 +33,11 @@ db.create_all()
 
 #Helper Function Used by GRMmouse
 
+def ownerHandler(owner):
+    if "@" in owner and owner.split("@")[1]=="andrew.cmu.edu":
+        return owner.split("@")[0]
+    return None
+
 def keywordsHandler(keywords):
     keywords=keywords[3:]
     if "," in keywords:
@@ -44,17 +49,17 @@ def keywordsHandler(keywords):
 
 def contentHandler(content):
     "Takes the string after post/ and returns a posts object"
-    owner=content["q1"]
+    owner=ownerHandler(content["q1"])
     title=content["q2"]
     keywords=keywordsHandler(content["q3"])
     objective=content["q4"]
     description=content["q5"]
     requirement=content["q6"]
     announcement=content["q7"]
-    #if keywords!=None:
-    return projects(owner,title,content["q3"],objective,description,requirement,announcement)
-    #else:
-    #    return None
+    if owner!=None and keywords!=None:
+        return projects(owner,title,content["q3"],objective,description,requirement,announcement)
+    else:
+        return None
 
 
 @app.route('/')
@@ -73,8 +78,9 @@ def create():
 @app.route('/newpost', methods=["POST"]) 
 def newpost():
     newProject=contentHandler(request.form)
-    db.session.add(newProject)
-    db.session.commit()
+    if newProject!=None:
+        db.session.add(newProject)
+        db.session.commit()
     return redirect(url_for("index"))
 
 @app.route("/about")
