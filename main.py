@@ -57,7 +57,7 @@ def index():
 
 @app.route('/create')
 def create():
-    return 'create page'
+    return render_template("create.html")
 
 @app.route('/newpost',methods=["POST"])
 def newpost():
