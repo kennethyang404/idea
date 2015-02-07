@@ -239,7 +239,7 @@ def detail(ID):
 @app.route("/usr/<int:user_id>")
 @login_required
 def user(user_id):
-    result=Projects.query.filter_by(owner=current_user.name).all()
+    result=Projects.query.filter_by(owner=user_id).all()
     recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
     return render_template("index.html",posts=result,recents=recent,userid=user_id)
 
