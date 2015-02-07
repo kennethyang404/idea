@@ -34,18 +34,12 @@ db.create_all()
 #Helper Function Used by GRMmouse
 
 def ownerHandler(owner):
-    if "@" in owner and owner.split("@")[1]=="andrew.cmu.edu":
+    if owner.endswith("@andrew.cmu.edu")
         return owner.split("@")[0]
     return None
 
 def keywordsHandler(keywords):
-    keywords=keywords[3:]
-    if "," in keywords:
-        return ";".join(keywords.split(","))
-    elif ";" in keywords:
-        return keywords
-    else:
-        return None
+    return keywords.replace(",",";")
 
 def contentHandler(content):
     "Takes the string after post/ and returns a posts object"
