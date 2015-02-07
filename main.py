@@ -59,7 +59,7 @@ def index():
 def create():
     return render_template("create.html")
 
-@app.route('/newpost/<string:content')
+@app.route('/newpost/<string:content>')
 def newpost(content):
     newTitle = "abc"
     newSubtitle="def"
