@@ -3,7 +3,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required, user_logged_in
 from flask_oauth import OAuth
 from time import time
-
+import random
 
 
 app = Flask(__name__)
@@ -190,7 +190,9 @@ def getCurrentUserID():
 @app.route('/index')
 @login_required
 def index():
-    post=Projects.query.order_by(Projects.score).limit(9).all()
+    post=Projects.query.all()
+    random.shuffle(post)
+    post=sorted(post[:9],compareScore)
     #post on the main page, recent for the search box
     recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
     return render_template("index.html", posts=post,recents=recent,userid=getCurrentUserID())
