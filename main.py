@@ -31,14 +31,14 @@ class projects(db.Model):
         self.requirement=requirement
         self.announcement=announcement
         self.score=20
-        self.date=int(time.time())
+        self.date=int(time())
 
 db.create_all()
 
 #Helper Function Used by GRMmouse
 
 def ownerHandler(owner):
-    if owner.endswith("@andrew.cmu.edu")
+    if owner.endswith("@andrew.cmu.edu"):
         return owner.split("@")[0]
     return None
 
@@ -65,8 +65,8 @@ def login():
 
 @app.route('/index')
 def index():
-    post=projects.query.all().first()*9
-    recent=projects.query.filter(projects.date>time.time()-86400*15).order_by(-projects.date).limit(5).all()
+    post=[projects.query.first()]*9
+    recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
     return render_template("index.html", posts=post,recents=recent)
 
 @app.route('/create')
