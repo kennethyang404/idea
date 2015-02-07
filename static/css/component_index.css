@@ -40,6 +40,13 @@ html, body, .vs-container {
     color: #893027;
 }
 
+.user-panel > h4 {
+    position: absolute;
+    left: 25pt;
+    top: 5pt;
+    z-index: 5000;
+}
+
 .vs-nav {
     position: relative;
     display: block;
@@ -300,14 +307,6 @@ html, body, .vs-container {
 .vs-content p {
     margin: 0 0 20px 0;
     padding: 0;
-}
-
-
-.user-panel {
-    position: absolute;
-    left: 25pt;
-    top: 5pt;
-    z-index: -1;
 }
 
 /* Media queries */
