@@ -11,6 +11,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/posts.db"
 
 db = SQLAlchemy(app)
 
+def compare(left,right):
+    return cmp(-left.score,-right.score)
+
 class posts(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(140))
@@ -19,7 +22,7 @@ class posts(db.Model):
     score = db.Column(db.Integer)
     date = db.Column(db.DateTime())
     
-    def __init__(self, title, subtitle, text, score):
+    def __init__(self, title, subtitle, text):
         self.title = title
         self.subtitle=subtitle
         self.text = text
@@ -28,46 +31,18 @@ class posts(db.Model):
 
 db.create_all()
 
-
-#Helper Function Used by GRMmouse
-def compare(left,right):
-    return cmp(-left.score,-right.score)
-
-def createTitle(text):
-    if (text != None) and (len(text) <= 140):
-        return text
-    else:
-        return None
-
-def createNewText(text):
-    if (text!=None) and (len(text)<=1000):
-        return text
-    else:
-        return None
-
-
 @app.route('/')
 def login():
     return 'Login'
 
 @app.route('/index')
 def index():
-    posts=sorted(db.query.all(),cmp=compare)[0:9]
+    posts=sorted(db.query.all(),compare)[0:9]
     return render_template("index.html",posts=posts)
 
 @app.route('/create')
 def create():
     return 'create page'
-
-@app.route('/newpost',methods=["POST"])
-def newpost():
-    newTitle = createTitle(request.form["post-title"])
-    newSubtitle=createTitle(request.form["post-subtitle"])
-    newText=creatNewText(request.form["post-text"])
-    newScore=20
-    db.session.add(posts(newTitle,newSubtitle,newTitle,newScore))
-    db.session.commit()
-    return redirect(url_for("index"))
 
 @app.route("/about")
 def about():
@@ -79,4 +54,4 @@ def user(user_id):
 
 if __name__ == '__main__':
     app.debug = True;
-    app.run(host='0.0.0.0')
+    app.run()
