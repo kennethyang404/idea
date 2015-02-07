@@ -307,7 +307,7 @@ html, body, .vs-container {
     position: absolute;
     left: 25pt;
     top: 5pt;
-    z-index: 2000;
+    z-index: -1;
 }
 
 /* Media queries */
