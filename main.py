@@ -30,7 +30,7 @@ class projects(db.Model):
         self.description=description
         self.requirement=requirement
         self.announcement=announcement
-        self.score=20
+        self.score=3
         self.date=int(time())
 
 db.create_all()
@@ -59,16 +59,25 @@ def contentHandler(content):
     else:
         return None
 
+def searchHandler(content):
+    keywords=content.split(" ")
+    return [keywords[i] for i in xrange(len(keywords)) if keywords[i]!=""]
+
+def wordSearch(word):
+    return word in projects.description or word in projects.requirement or word in projects.keywords or word in projects.objective or word in projects.owner or word in projects.announcement or word in title
+
 @app.route('/')
 def login():
     return 'Login'
 
 @app.route('/index')
 def index():
-    post=[projects.query.first()]*9
+    post=projects.query.order_by(projects.score).limit(9).all()
+    #post on the main page, recent for the search box
     recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
     return render_template("index.html", posts=post,recents=recent)
 
+#These two below are for creating new projects
 @app.route('/create')
 def create():
     return render_template("create.html")
@@ -80,6 +89,22 @@ def newpost():
         db.session.add(newProject)
         db.session.commit()
     return redirect(url_for("index"))
+
+@app.route('/search',methods=["POST"])
+def search():
+    content=request.form["searchbox"]
+    keywords=searchHandler(content)
+    result=projects.query
+    for word in keywords:
+        if len(result.all())<=5: 
+            for primary_key in result:
+                projects.query.get(primary_key).score
+            break
+        result=projects.query.filter(wordSearch(word)).intersect(result)
+    result=result.order_by(-projects.score).limit(15).order_by(-projects.recent).limit(5).all()
+    for i in xrange(5):
+        result[i].score+=(5-i)/2
+    return render_template("result.html",searchresult=result)
 
 @app.route("/about")
 def about():
