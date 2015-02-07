@@ -64,6 +64,12 @@ def newpost(content):
     newTitle="content"
     newSubtitle="Cde"
     newText="efg"
+
+@app.route('/newpost/<string:content')
+def newpost(content):
+    newTitle = "abc"
+    newSubtitle="def"
+    newText=content
     newScore=20
     db.session.add(posts(newTitle,newSubtitle,newTitle,newScore))
     db.session.commit()
