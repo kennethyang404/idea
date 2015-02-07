@@ -41,7 +41,10 @@ html, body, .vs-container {
 }
 
 .user-panel > h4 {
-    z-index: 1000;
+    position: absolute;
+    left: 25pt;
+    top: 5pt;
+    z-index: 5000;
 }
 
 .vs-nav {
