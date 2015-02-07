@@ -40,7 +40,7 @@ html, body, .vs-container {
     color: #893027;
 }
 
-#user-panel {
+.user-panel > h4 {
     z-index: 1000;
 }
 
