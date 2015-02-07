@@ -259,6 +259,10 @@ def facebook_authorized(resp):
         )
     session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
+    fbuser=User.verify(me.data['id'], me.data['id'])
+    if fbuser == False: 
+        fbuser=User.add(me.data['id'], me.data['id'])
+    login_user(fbuser)
     return redirect(url_for("index"))
 
 @facebook.tokengetter
