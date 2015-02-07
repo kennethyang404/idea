@@ -40,6 +40,10 @@ html, body, .vs-container {
     color: #893027;
 }
 
+#user-panel {
+    z-index: 1000;
+}
+
 .vs-nav {
     position: relative;
     display: block;
