@@ -63,8 +63,14 @@ def searchHandler(content):
     keywords=content.split(" ")
     return [keywords[i] for i in xrange(len(keywords)) if keywords[i]!=""]
 
-def wordSearch(word):
-    return word in projects.description or word in projects.requirement or word in projects.keywords or word in projects.objective or word in projects.owner or word in projects.announcement or word in title
+def wordSearch(word,item):
+    return (word in item.description.lower()) or (word in item.requirement.lower()) or (word in item.keywords.lower()) or (word in item.objective.lower()) or (word in item.owner.lower()) or (word in item.announcement.lower()) or (word in item.title.lower())
+
+def compareScore(left,right):
+    return cmp(-left.score,-right.score)
+
+def compareDate(left,right):
+    return cmp(-left.date,-right.date)
 
 @app.route('/')
 def login():
@@ -90,21 +96,18 @@ def newpost():
         db.session.commit()
     return redirect(url_for("index"))
 
-@app.route('/search',methods=["POST"])
+@app.route('/search', methods=["POST"])
 def search():
     content=request.form["searchbox"]
     keywords=searchHandler(content)
-    result=projects.query
+    result=list()
     for word in keywords:
-        if len(result.all())<=5: 
-            for primary_key in result:
-                projects.query.get(primary_key).score
-            break
-        result=projects.query.filter(wordSearch(word)).intersect(result)
-    result=result.order_by(-projects.score).limit(15).order_by(-projects.recent).limit(5).all()
-    for i in xrange(5):
-        result[i].score+=(5-i)/2
-    return render_template("result.html",searchresult=result)
+        for item in projects.query.all():
+            if wordSearch(word.lower(),item):
+                result.append(item)
+    result=sorted((sorted(result,compareDate)[:15]),compareScore)[:9]
+    recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
+    return render_template("result.html",posts=result,recents=recent)
 
 @app.route("/about")
 def about():
