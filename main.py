@@ -19,6 +19,8 @@ class projects(db.Model):
     description=db.Column(db.String(1000))
     requirement=db.Column(db.String(1000))
     announcement=db.Column(db.String(1000))
+    score = db.Column(db.Integer)
+    date = db.Column(db.DateTime())
     
     def __init__(self, owner, title, keywords, objective, description, requirement, announcement):
         self.owner=owner
@@ -28,6 +30,8 @@ class projects(db.Model):
         self.description=description
         self.requirement=requirement
         self.announcement=announcement
+        self.score=20
+        self.date=datetime.utcnow()
 
 db.create_all()
 
@@ -55,15 +59,15 @@ def contentHandler(content):
     else:
         return None
 
-
 @app.route('/')
 def login():
     return 'Login'
 
 @app.route('/index')
 def index():
-    test=(projects.query.all()[:1])*9
-    return render_template("index.html", posts=test)
+    post=projects.query.all().first()*9
+    recent=projects.query.
+    return render_template("index.html", posts=post,recents=recent)
 
 @app.route('/create')
 def create():
