@@ -60,12 +60,15 @@ def create():
     return render_template("create.html")
 
 @app.route('/newpost/<string:content>')
+<<<<<<< HEAD
 def newpost(content):
     newTitle="content"
     newSubtitle="Cde"
     newText="efg"
 
 @app.route('/newpost/<string:content')
+=======
+>>>>>>> 21b8694d89c41c3dffdfd11ce6529e41f1728ded
 def newpost(content):
     newTitle = "abc"
     newSubtitle="def"
