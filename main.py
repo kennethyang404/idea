@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
-from datetime import datetime
+from time import time
 
 
 
@@ -20,7 +20,7 @@ class projects(db.Model):
     requirement=db.Column(db.String(1000))
     announcement=db.Column(db.String(1000))
     score = db.Column(db.Integer)
-    date = db.Column(db.DateTime())
+    date = db.Column(db.Integer)
     
     def __init__(self, owner, title, keywords, objective, description, requirement, announcement):
         self.owner=owner
@@ -31,7 +31,7 @@ class projects(db.Model):
         self.requirement=requirement
         self.announcement=announcement
         self.score=20
-        self.date=datetime.utcnow()
+        self.date=int(time.time())
 
 db.create_all()
 
@@ -66,7 +66,7 @@ def login():
 @app.route('/index')
 def index():
     post=projects.query.all().first()*9
-    recent=projects.query.
+    recent=projects.query.filter(projects.date>time.time()-86400*15).order_by(-projects.date).limit(5).all()
     return render_template("index.html", posts=post,recents=recent)
 
 @app.route('/create')
