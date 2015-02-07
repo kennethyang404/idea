@@ -1,20 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash, get_flashed_messages  
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required
 from time import time
 
 
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///projects.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///Projects.db"
+app.config['SECRET_KEY'] = 'SET T0 4NY SECRET KEY L1KE RAND0M H4SH'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 db = SQLAlchemy(app)
 
-class projects(db.Model):
+class Projects(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
-    owner=db.Column(db.String(100))
-    title = db.Column(db.String(100))
-    keywords=db.Column(db.String(100))
+    owner=db.Column(db.String(255))
+    title = db.Column(db.String(255))
+    keywords=db.Column(db.String(255))
     objective = db.Column(db.String(1000))
     description=db.Column(db.String(1000))
     requirement=db.Column(db.String(1000))
@@ -33,9 +38,95 @@ class projects(db.Model):
         self.score=3
         self.date=int(time())
 
+
+class User(db.Model):
+    ID = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    password = db.Column(db.String(255))
+    follow = db.Column(db.Integer)
+    post = db.Column(db.Integer)
+
+    def __init__(self, name, password, follow=0, post=0):
+        self.name = name
+        self.password = password
+        self.follow = follow
+        self.post = post
+    
+    @classmethod
+    def verify(self, name, password):
+        expect = User.query.filter_by(name=name).first()
+        if (expect==None)or(expect.password != password):
+            return False
+        else:
+            return expect
+
+    def is_authenticated(self):
+        return (User.verify(self.name,self.password) != False)
+
+    def is_active(self):
+        return self.is_authenticated()
+
+    def is_anonymous(self):
+        return not self.is_authenticated()
+
+    def get_id(self):
+        return self.ID
+
+    @classmethod
+    def get(self_class, id):
+        try:
+            return User.query.filter_by(ID=id).first()
+        except UserNotFoundError:
+            return None
+
+    @classmethod
+    def used(self_class, name):
+        return (User.query.filter_by(name=name).first() != None)
+
+    @classmethod
+    def add(self_class, name, password):
+        user=User(name, password)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
 db.create_all()
 
-#Helper Function Used by GRMmouse
+
+
+@login_manager.user_loader
+def load_user(userid):
+    return User.get(userid)
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method=="POST":
+        form = request.form
+        user=User.verify(form["email"],form["password"])
+        if (user != False):
+            login_user(user)
+            flash("Logged in successfully.")
+            print "!!!!!!!"
+            return redirect(url_for("index"))
+    return render_template("login.html")
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    form = request.form
+    print User.used(form["email"])
+    if (not User.used(form["email"])) and (form["password"]==form["confirm"]):
+        user=User.add(form["email"], form["password"])
+        login_user(user)
+        flash("Logged in successfully.")
+        return redirect(url_for("index"))
+    return redirect(url_for("login"))
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
+
 
 def ownerHandler(owner):
     if owner.endswith("cmu.edu"):
@@ -55,7 +146,7 @@ def contentHandler(content):
     requirement=content["q6"]
     announcement=content["q7"]
     if owner:
-        return projects(owner,title,content["q3"],objective,description,requirement,announcement)
+        return Projects(owner,title,content["q3"],objective,description,requirement,announcement)
     else:
         return None
 
@@ -73,17 +164,15 @@ def compareDate(left,right):
     return cmp(-left.date,-right.date)
 
 @app.route('/')
-def login():
-    return 'Login'
-
 @app.route('/index')
+@login_required
 def index():
-    post=projects.query.order_by(projects.score).limit(9).all()
+    post=Projects.query.order_by(Projects.score).limit(9).all()
     #post on the main page, recent for the search box
-    recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
+    recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
     return render_template("index.html", posts=post,recents=recent)
 
-#These two below are for creating new projects
+#These two below are for creating new Projects
 @app.route('/create')
 def create():
     return render_template("create.html")
@@ -102,7 +191,7 @@ def search():
     keywords=searchHandler(content)
     result=list()
     for word in keywords:
-        for item in projects.query.all():
+        for item in Projects.query.all():
             if wordSearch(word.lower(),item):
                 result.append(item)
     result=sorted((sorted(result,compareDate)[:15]),compareScore)[:9]
@@ -110,13 +199,13 @@ def search():
         item.score+=1
         db.session.commit()
         
-    recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
+    recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
     return render_template("index.html",posts=result,recents=recent)
 
 @app.route('/detail/<int:ID>')
 def detail(ID):
-    result=[projects.query.get(ID)]
-    recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
+    result=[Projects.query.get(ID)]
+    recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
     return render_template("index.html",posts=result,recents=recent)
 
 @app.route("/about")
