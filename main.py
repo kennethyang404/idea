@@ -160,7 +160,7 @@ def contentHandler(content):
     description=content["q5"]
     requirement=content["q6"]
     announcement=content["q7"]
-    owner=current_user.name
+    owner=getCurrentUserID()
     if email:
         return Projects(email,title,content["q3"],objective,description,requirement,announcement,owner)
     else:
@@ -180,7 +180,10 @@ def compareDate(left,right):
     return cmp(-left.date,-right.date)
 
 def getCurrentUserID():
-    return User.query.filter_by(name=current_user.name).first().ID
+    try:
+        return User.query.filter_by(name=current_user.name).first().ID
+    except:
+        return -1
 
 
 @app.route('/')
