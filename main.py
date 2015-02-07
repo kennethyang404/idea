@@ -28,7 +28,7 @@ db = SQLAlchemy(app)
 
 class Projects(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
-    owner=db.Column(db.String(255))
+    email=db.Column(db.String(255))
     title = db.Column(db.String(255))
     keywords=db.Column(db.String(255))
     objective = db.Column(db.String(1000))
@@ -37,9 +37,11 @@ class Projects(db.Model):
     announcement=db.Column(db.String(1000))
     score = db.Column(db.Integer)
     date = db.Column(db.Integer)
+    owner=db.Column(db.Integer)
+
     
-    def __init__(self, owner, title, keywords, objective, description, requirement, announcement):
-        self.owner=owner
+    def __init__(self, email, title, keywords, objective, description, requirement, announcement,owner):
+        self.email=email
         self.title=title
         self.keywords=keywords
         self.objective=objective
@@ -48,6 +50,7 @@ class Projects(db.Model):
         self.announcement=announcement
         self.score=3
         self.date=int(time())
+        self.owner=owner
 
 
 class User(db.Model):
@@ -87,7 +90,7 @@ class User(db.Model):
     def get(self_class, id):
         try:
             return User.query.filter_by(ID=id).first()
-        except UserNotFoundError:
+        except:
             return None
 
     @classmethod
@@ -140,9 +143,9 @@ def logout():
     return redirect(url_for("index"))
 
 
-def ownerHandler(owner):
-    if owner.endswith("cmu.edu"):
-        return owner.split("@")[0]
+def emailHandler(email):
+    if "@" in email:
+        return email
     return None
 
 def keywordsHandler(keywords):
@@ -150,15 +153,16 @@ def keywordsHandler(keywords):
 
 def contentHandler(content):
     "Takes the string after post/ and returns a posts object"
-    owner=ownerHandler(content["q1"])
+    email=emailHandler(content["q1"])
     title=content["q2"]
     keywords=keywordsHandler(content["q3"])
     objective=content["q4"]
     description=content["q5"]
     requirement=content["q6"]
     announcement=content["q7"]
-    if owner:
-        return Projects(owner,title,content["q3"],objective,description,requirement,announcement)
+    owner=current_user.name
+    if email:
+        return Projects(email,title,content["q3"],objective,description,requirement,announcement,owner)
     else:
         return None
 
@@ -175,6 +179,10 @@ def compareScore(left,right):
 def compareDate(left,right):
     return cmp(-left.date,-right.date)
 
+def getCurrentUserID():
+    return User.query.filter_by(name=current_user.name).first().ID
+
+
 @app.route('/')
 @app.route('/index')
 @login_required
@@ -182,7 +190,7 @@ def index():
     post=Projects.query.order_by(Projects.score).limit(9).all()
     #post on the main page, recent for the search box
     recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
-    return render_template("index.html", posts=post,recents=recent)
+    return render_template("index.html", posts=post,recents=recent,userid=getCurrentUserID())
 
 #These two below are for creating new Projects
 @app.route('/create')
@@ -215,25 +223,22 @@ def search():
         db.session.commit()
         
     recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
-    return render_template("index.html",posts=result,recents=recent)
+    return render_template("index.html",posts=result,recents=recent,userid=getCurrentUserID())
 
 @app.route('/detail/<int:ID>')
 @login_required
 def detail(ID):
     result=[Projects.query.get(ID)]
     recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
-    return render_template("index.html",posts=result,recents=recent)
+    return render_template("index.html",posts=result,recents=recent,userid=getCurrentUserID())
 
-@app.route("/about")
-@login_required
-def about():
-    return "about.html"
 
 @app.route("/usr/<int:user_id>")
 @login_required
 def user(user_id):
-    return "User: %d" %user_id
-
+    result=Projects.query.filter_by(owner=current_user.name).all()
+    recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
+    return render_template("index.html",posts=result,recents=recent,userid=user_id)
 
 @app.route('/fblogin')
 def fblogin():
@@ -251,8 +256,7 @@ def facebook_authorized(resp):
         )
     session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
-    return 'Logged in as id=%s name=%s redirect=%s' % \
-        (me.data['id'], me.data['name'], request.args.get('next'))
+    return redirect(url_for("index"))
 
 @facebook.tokengetter
 def get_facebook_oauth_token():

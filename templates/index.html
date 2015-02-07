@@ -21,6 +21,14 @@
     </head>
     <body>
         <div id="vs-container" class="vs-container">
+            <div id="user-panel">
+                <div id="user-name">
+                    <a href="/usr/{{userid}}"><h4>{{current_user.name}}</h4></a>
+                </div>
+                <div id="logout">
+                    <a href="/logout"><h5>Logout</h5></a>
+                </div>
+            </div>
             <div id="morphsearch" class="morphsearch">
                 <form class="morphsearch-form" autocomplete="off" action="/search" method="POST">
                     <input class="morphsearch-input" type="search"  id="searchbox" name="searchbox" placeholder="Search..."/>
@@ -57,7 +65,9 @@
                                 <h3>Requirement</h3>
                                 {{i.requirement}}
                                 <h3>Special Announcement</h3>
-                                {{i.announcement}}                           
+                                {{i.announcement}}
+                                <h3>Contact</h3>
+                                {{i.email}}
                             </div>
                         </div>
                     </section>
