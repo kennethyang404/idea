@@ -108,16 +108,16 @@ def search():
     result=sorted((sorted(result,compareDate)[:15]),compareScore)[:9]
     for item in result:
         item.score+=1
-        db.sessoin.commit()
+        db.session.commit()
         
     recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
-    return render_template("result.html",posts=result,recents=recent)
+    return render_template("index.html",posts=result,recents=recent)
 
 @app.route('/detail/<int:ID>')
 def detail(ID):
     result=[projects.query.get(ID)]
     recent=projects.query.filter(projects.date>time()-86400*15).order_by(-projects.date).limit(5).all()
-    return render_template(detail.html,posts=result,recents=recent)
+    return render_template("index.html",posts=result,recents=recent)
 
 @app.route("/about")
 def about():
