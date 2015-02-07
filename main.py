@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, get_flashed_messages  
+from flask import Flask, render_template, request, redirect, url_for, flash, get_flashed_messages, session
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required
+from flask.ext.login import LoginManager, UserMixin, current_user, login_user, logout_user, login_required, user_logged_in
+from flask_oauth import OAuth
 from time import time
 
 
@@ -10,8 +11,18 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///Projects.db"
 app.config['SECRET_KEY'] = 'SET T0 4NY SECRET KEY L1KE RAND0M H4SH'
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+# Facebook Login
+app.config['FACEBOOK_APP_ID'] = '1540336042908904'
+app.config['FACEBOOK_APP_SECRET'] = '036bb9bb8937f6499e3c6ddc8634cbfc'
+oauth = OAuth()
+facebook = oauth.remote_app('facebook',
+    base_url='https://graph.facebook.com/',
+    request_token_url=None,
+    access_token_url='/oauth/access_token',
+    authorize_url='https://www.facebook.com/dialog/oauth',
+    consumer_key=app.config['FACEBOOK_APP_ID'],
+    consumer_secret=app.config['FACEBOOK_APP_SECRET'],
+    request_token_params={'scope': 'email'})
 
 db = SQLAlchemy(app)
 
@@ -92,7 +103,9 @@ class User(db.Model):
 
 db.create_all()
 
-
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view="login"
 
 @login_manager.user_loader
 def load_user(userid):
@@ -106,7 +119,6 @@ def login():
         if (user != False):
             login_user(user)
             flash("Logged in successfully.")
-            print "!!!!!!!"
             return redirect(url_for("index"))
     return render_template("login.html")
 
@@ -174,10 +186,12 @@ def index():
 
 #These two below are for creating new Projects
 @app.route('/create')
+@login_required
 def create():
     return render_template("create.html")
 
 @app.route('/newpost', methods=["POST"]) 
+@login_required
 def newpost():
     newProject=contentHandler(request.form)
     if newProject:
@@ -186,6 +200,7 @@ def newpost():
     return redirect(url_for("index"))
 
 @app.route('/search', methods=["POST"])
+@login_required
 def search():
     content=request.form["searchbox"]
     keywords=searchHandler(content)
@@ -203,19 +218,47 @@ def search():
     return render_template("index.html",posts=result,recents=recent)
 
 @app.route('/detail/<int:ID>')
+@login_required
 def detail(ID):
     result=[Projects.query.get(ID)]
     recent=Projects.query.filter(Projects.date>time()-86400*15).order_by(-Projects.date).limit(5).all()
     return render_template("index.html",posts=result,recents=recent)
 
 @app.route("/about")
+@login_required
 def about():
     return "about.html"
 
 @app.route("/usr/<int:user_id>")
+@login_required
 def user(user_id):
     return "User: %d" %user_id
+
+
+@app.route('/fblogin')
+def fblogin():
+    return facebook.authorize(callback=url_for('facebook_authorized',
+        next=request.args.get('next') or request.referrer or None,
+        _external=True))
+
+@app.route('/fblogin/authorized')
+@facebook.authorized_handler
+def facebook_authorized(resp):
+    if resp is None:
+        return 'Access denied: reason=%s error=%s' % (
+            request.args['error_reason'],
+            request.args['error_description']
+        )
+    session['oauth_token'] = (resp['access_token'], '')
+    me = facebook.get('/me')
+    return 'Logged in as id=%s name=%s redirect=%s' % \
+        (me.data['id'], me.data['name'], request.args.get('next'))
+
+@facebook.tokengetter
+def get_facebook_oauth_token():
+    return session.get('oauth_token')
 
 if __name__ == '__main__':
     app.debug = True;
     app.run(host='0.0.0.0')
+
