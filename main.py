@@ -52,7 +52,7 @@ def login():
 
 @app.route('/index')
 def index():
-    posts=sorted(db.query.all(),cmp=compare)[0:9]
+    posts=sorted(db.query.all(),compare)[0:9]
     return render_template("index.html",posts=posts)
 
 @app.route('/create')
