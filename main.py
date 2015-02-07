@@ -171,7 +171,7 @@ def searchHandler(content):
     return [keywords[i] for i in xrange(len(keywords)) if keywords[i]!=""]
 
 def wordSearch(word,item):
-    return (word in item.description.lower()) or (word in item.requirement.lower()) or (word in item.keywords.lower()) or (word in item.objective.lower()) or (word in item.owner.lower()) or (word in item.announcement.lower()) or (word in item.title.lower())
+    return (word in item.description.lower()) or (word in item.requirement.lower()) or (word in item.keywords.lower()) or (word in item.objective.lower())  or (word in item.announcement.lower()) or (word in item.title.lower())
 
 def compareScore(left,right):
     return cmp(-left.score,-right.score)
