@@ -59,11 +59,11 @@ def index():
 def create():
     return render_template("create.html")
 
-@app.route('/newpost',methods=["POST"])
-def newpost():
-    newTitle = createTitle(request.form["post-title"])
-    newSubtitle=createTitle(request.form["post-subtitle"])
-    newText=creatNewText(request.form["post-text"])
+@app.route('/newpost/<string:content>')
+def newpost(content):
+    newTitle="content"
+    newSubtitle="Cde"
+    newText="efg"
     newScore=20
     db.session.add(posts(newTitle,newSubtitle,newTitle,newScore))
     db.session.commit()
