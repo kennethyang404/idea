@@ -20,7 +20,7 @@ class projects(db.Model):
     requirement=db.Column(db.String(1000))
     announcement=db.Column(db.String(1000))
     
-    def __init__(self, owner, title, keywords,objective,description,requirement,announcement):
+    def __init__(self, owner, title, keywords, objective, description, requirement, announcement):
         self.owner=owner
         self.title=title
         self.keywords=keywords
@@ -56,7 +56,7 @@ def contentHandler(content):
     description=content["q5"]
     requirement=content["q6"]
     announcement=content["q7"]
-    if owner!=None and keywords!=None:
+    if owner:
         return projects(owner,title,content["q3"],objective,description,requirement,announcement)
     else:
         return None
@@ -68,7 +68,7 @@ def login():
 
 @app.route('/index')
 def index():
-    test=(projects.query.all()[:4])*3
+    test=(projects.query.all()[:1])*9
     return render_template("index.html", posts=test)
 
 @app.route('/create')
@@ -78,7 +78,7 @@ def create():
 @app.route('/newpost', methods=["POST"]) 
 def newpost():
     newProject=contentHandler(request.form)
-    if newProject!=None:
+    if newProject:
         db.session.add(newProject)
         db.session.commit()
     return redirect(url_for("index"))
