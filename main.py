@@ -38,7 +38,7 @@ db.create_all()
 #Helper Function Used by GRMmouse
 
 def ownerHandler(owner):
-    if owner.endswith("@andrew.cmu.edu"):
+    if owner.endswith("cmu.edu"):
         return owner.split("@")[0]
     return None
 
