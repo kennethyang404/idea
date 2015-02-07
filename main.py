@@ -12,7 +12,7 @@ db = SQLAlchemy(app)
 
 class projects(db.Model):
     ID = db.Column(db.Integer, primary_key=True)
-    ownerr=db.Column(db.String(100))
+    owner=db.Column(db.String(100))
     title = db.Column(db.String(100))
     keywords=db.Column(db.String(100))
     objective = db.Column(db.String(1000))
@@ -20,8 +20,8 @@ class projects(db.Model):
     requirement=db.Column(db.String(1000))
     announcement=db.Column(db.String(1000))
     
-    def __init__(self, ownerr, title, keywords,objective,description,requirement,announcement):
-        self.ownerr=ownerr
+    def __init__(self, owner, title, keywords,objective,description,requirement,announcement):
+        self.owner=owner
         self.title=title
         self.keywords=keywords
         self.objective=objective
