@@ -22,12 +22,7 @@
     <body>
         <div id="vs-container" class="vs-container">
             <div id="user-panel">
-                <div id="user-name">
-                    <a href="/usr/{{userid}}"><h4>{{current_user.name}}</h4></a>
-                </div>
-                <div id="logout">
-                    <a href="/logout"><h5>Logout</h5></a>
-                </div>
+                <h4><a href="/usr/{{userid}}">{{current_user.name}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/logout">Logout</a></h4>
             </div>
             <div id="morphsearch" class="morphsearch">
                 <form class="morphsearch-form" autocomplete="off" action="/search" method="POST">
