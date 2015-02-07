@@ -6,7 +6,7 @@ from time import time
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/projects.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///projects.db"
 
 db = SQLAlchemy(app)
 
