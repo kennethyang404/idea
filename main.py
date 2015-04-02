@@ -12,8 +12,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///Projects.db"
 app.config['SECRET_KEY'] = 'SET T0 4NY SECRET KEY L1KE RAND0M H4SH'
 
 # Facebook Login
-app.config['FACEBOOK_APP_ID'] = '1540336042908904'
-app.config['FACEBOOK_APP_SECRET'] = '036bb9bb8937f6499e3c6ddc8634cbfc'
+app.config['FACEBOOK_APP_ID'] = '410688905772411'
+app.config['FACEBOOK_APP_SECRET'] = 'ad9bc7d4238276e17081a3e008f4e76f'
 oauth = OAuth()
 facebook = oauth.remote_app('facebook',
     base_url='https://graph.facebook.com/',
